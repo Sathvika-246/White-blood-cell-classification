@@ -1,0 +1,83 @@
+/* ========================================
+   WBC Classification - Modern Medical Theme
+   Design System & Global Styles
+   ======================================== */
+
+/* ============ CSS VARIABLES ============ */
+:root {
+    /* Primary Colors */
+    --primary-teal: #14B8A6;
+    --primary-teal-dark: #0D9488;
+    --primary-teal-light: #5EEAD4;
+    
+    /* Accent Colors */
+    --accent-coral: #FF6B6B;
+    --accent-orange: #FF8E53;
+    --accent-purple: #6C5CE7;
+    --accent-purple-light: #A29BFE;
+    
+    /* Neutral Colors */
+    --white: #FFFFFF;
+    --off-white: #F8FAFC;
+    --gray-100: #F1F5F9;
+    --gray-200: #E2E8F0;
+    --gray-300: #CBD5E1;
+    --gray-400: #94A3B8;
+    --gray-500: #64748B;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1E293B;
+    --gray-900: #0F172A;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--primary-teal) 0%, var(--accent-purple) 100%);
+    --gradient-teal-blue: linear-gradient(135deg, #14B8A6 0%, #3B82F6 100%);
+    --gradient-coral-orange: linear-gradient(135deg, var(--accent-coral) 0%, var(--accent-orange) 100%);
+    --gradient-dark: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px rgba(13, 148, 136, 0.08);
+    --shadow-md: 0 4px 16px rgba(13, 148, 136, 0.12);
+    --shadow-lg: 0 10px 40px rgba(13, 148, 136, 0.15);
+    --shadow-xl: 0 20px 60px rgba(13, 148, 136, 0.2);
+    --shadow-glow: 0 0 30px rgba(20, 184, 166, 0.3);
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-xl: 25px;
+    --radius-full: 50%;
+    
+    /* Typography */
+    --font-primary: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-heading: 'Segoe UI', sans-serif;
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    
+    /* Spacing */
+    --header-height: 80px;
+}
+
+/* ============ GLOBAL RESET ============ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-primary);
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    background: var(--off-white);
+    min-height: 100vh;
+}

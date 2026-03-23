@@ -1,0 +1,301 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block page_title %}Model Training{% endblock %}
+
+{% block extra_css %}
+<style>
+    .training-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .training-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .training-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .training-header h2 {
+        color: var(--primary-600);
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .training-header p {
+        color: var(--gray-600);
+        font-size: 1rem;
+    }
+
+    .model-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .model-info-card {
+        background: var(--gray-50);
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .model-info-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .model-info-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .model-info-card h4 {
+        color: var(--gray-800);
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+    }
+
+    .model-info-card p {
+        color: var(--gray-600);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .training-info {
+        background: var(--gray-50);
+        border-radius: 16px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+
+    .training-info h3 {
+        color: var(--gray-800);
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .training-info ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .training-info li {
+        padding: 10px 0;
+        padding-left: 25px;
+        position: relative;
+        color: var(--gray-700);
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .training-info li:last-child {
+        border-bottom: none;
+    }
+
+    .training-info li::before {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--primary-500);
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+
+    .train-btn-container {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .btn-train {
+        background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+        color: white;
+        padding: 16px 40px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+    }
+
+    .btn-train:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 107, 107, 0.4);
+    }
+
+    .results-section {
+        margin-top: 30px;
+    }
+
+    .results-section h3 {
+        color: var(--gray-800);
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 1.5rem;
+    }
+
+    .result-box {
+        padding: 20px;
+        background: #e9f5ff;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        color: var(--gray-800);
+        border-left: 4px solid var(--primary-500);
+    }
+
+    .result-box strong {
+        color: var(--primary-600);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: var(--gray-700);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-table thead {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+    }
+    .results-table thead th {
+        padding: 15px;
+        font-weight: 600;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+    .results-table tbody tr {
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .results-table tbody tr:nth-child(even) {
+        background: var(--gray-50);
+    }
+
+    .results-table tbody tr:hover {
+        background: var(--primary-50);
+    }
+
+    .results-table tbody td {
+        padding: 15px;
+        color: var(--gray-700);
+    }
+</style>
+{% endblock %}
+
+{% block contents %}
+<div class="training-container">
+    <div class="training-card">
+        <div class="training-header">
+            <h2>📊 Model Training</h2>
+            <p>Train the CNN model on WBC image dataset</p>
+        </div>
+
+        <div class="model-info-grid">
+            <div class="model-info-card">
+                <div class="icon">🧠</div>
+                <h4>Architecture</h4>
+                <p>MobileNetV2</p>
+            </div>
+            <div class="model-info-card">
+                <div class="icon">📐</div>
+                <h4>Image Size</h4>
+                <p>160x160 px</p>
+            </div>
+            <div class="model-info-card">
+                <div class="icon">📦</div>
+                <h4>Batch Size</h4>
+                <p>32</p>
+            </div>
+            <div class="model-info-card">
+                <div class="icon">🎯</div>
+                <h4>Classes</h4>
+                <p>4 WBC Types</p>
+            </div>
+        </div>
+
+        <div class="training-info">
+            <h3>Training Configuration</h3>
+            <ul>
+                <li><strong>Base Model:</strong> MobileNetV2 (pre-trained on ImageNet)</li>
+                <li><strong>Epochs:</strong> 15 (with early stopping)</li>
+                <li><strong>Optimizer:</strong> Adam (learning rate: 0.0001)</li>
+                <li><strong>Loss Function:</strong> Categorical Crossentropy</li>
+                <li><strong>Data Augmentation:</strong> Shear, Zoom, Horizontal Flip</li>
+                <li><strong>Early Stopping:</strong> Patience of 4 epochs</li>
+            </ul>
+        </div>
+
+        <div class="train-btn-container">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn-train" onclick="return confirm('Are you sure you want to start training? This process may take several minutes.')">
+                    🚀 Start Training
+                </button>
+            </form>
+        </div>
+
+        {% if results %}
+        <div class="results-section">
+            <h3>Training Results</h3>
+            {% for result in results %}
+            <div class="result-box">
+                <strong>Epoch {{ result.epoch }}:</strong> 
+                Accuracy = {{ result.train_accuracy|floatformat:4 }}, 
+                Val Accuracy = {{ result.val_accuracy|floatformat:4 }}, 
+                Loss = {{ result.train_loss|floatformat:4 }}, 
+                Val Loss = {{ result.val_loss|floatformat:4 }}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h3>No Training Results Yet</h3>
+            <p>Click "Start Training" to begin training the model</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,551 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBC Image Analysis - WBC Classification</title>
+    <style>
+        :root {
+            --primary-50: #F0FDFA;
+            --primary-100: #CCFBF1;
+            --primary-200: #99F6E4;
+            --primary-300: #5EEAD4;
+            --primary-400: #2DD4BF;
+            --primary-500: #14B8A6;
+            --primary-600: #0D9488;
+            --primary-700: #0F766E;
+            --accent-coral: #FF6B6B;
+            --accent-orange: #FF8E53;
+            --accent-purple: #6C5CE7;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 50%, #3B82F6 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        .header.scrolled { box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.875rem 5%;
+        }
+
+        .logo { display: flex; align-items: center; gap: 0.75rem; text-decoration: none; }
+        .logo-icon { font-size: 2rem; animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        .title {
+            font-size: 1.35rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+        .nav-links a {
+            color: var(--gray-600);
+            text-decoration: none;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary-600);
+            background: var(--primary-50);
+        }
+
+        .auth-buttons { display: flex; gap: 0.75rem; align-items: center; }
+        .btn-auth {
+            padding: 0.625rem 1.5rem;
+            border: 2px solid var(--primary-500);
+            background: transparent;
+            color: var(--primary-600);
+            font-weight: 600;
+            border-radius: 25px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .btn-auth:hover {
+            background: var(--primary-500);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(13, 148, 136, 0.3);
+        }
+        .btn-auth.btn-logout {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border-color: transparent;
+        }
+
+        .hero-shapes {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        .shape-1 { width: 300px; height: 300px; top: -100px; right: -50px; }
+        .shape-2 { width: 200px; height: 200px; bottom: 10%; left: -50px; }
+        .shape-3 { width: 150px; height: 150px; top: 40%; right: 20%; }
+        .shape-4 { width: 100px; height: 100px; bottom: 20%; right: 10%; }
+        .shape-5 { width: 80px; height: 80px; top: 20%; left: 10%; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        .analysis-content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 120px 5% 60px;
+        }
+
+        .analysis-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            padding: 0.75rem 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: var(--gray-700);
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .back-btn:hover {
+            background: white;
+            transform: translateX(-5px);
+        }
+
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-header {
+            background: linear-gradient(135deg, var(--accent-coral), var(--accent-orange));
+            padding: 2.5rem;
+            text-align: center;
+            color: white;
+        }
+
+        .analysis-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .analysis-header p {
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        .analysis-body {
+            padding: 3rem;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--gray-300);
+            border-radius: 24px;
+            padding: 4rem 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            background: var(--gray-50);
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-500);
+            background: var(--primary-50);
+        }
+
+        .upload-icon { font-size: 5rem; margin-bottom: 1.5rem; display: block; }
+        .upload-area h3 {
+            color: var(--gray-700);
+            font-size: 1.4rem;
+            margin-bottom: 0.75rem;
+        }
+        .upload-area p {
+            color: var(--gray-500);
+            margin-bottom: 1.5rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .btn-upload {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            color: white;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .btn-upload:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(13, 148, 136, 0.4);
+        }
+
+        .btn-predict {
+            display: block;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 1.25rem 3rem;
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(13, 148, 136, 0.3);
+        }
+
+        .btn-predict:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(13, 148, 136, 0.4);
+        }
+
+        /* Result Section with Animations */
+        .result-section {
+            background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            animation: resultAppear 0.8s ease-out;
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.4);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        @keyframes resultAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes cellPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(20, 184, 166, 0); }
+        }
+
+        @keyframes confidenceFill {
+            from { width: 0; }
+        }
+
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.8), 0 0 80px rgba(255, 255, 255, 0.4); }
+        }
+
+        .result-section h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-image {
+            max-width: 300px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+            animation: cellPulse 2s ease-in-out infinite;
+            border: 4px solid rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 1.2rem 2.5rem;
+            background: white;
+            color: #FF6B6B;
+            border-radius: 30px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 40px rgba(255, 255, 255, 0.5);
+            position: relative;
+            z-index: 1;
+            letter-spacing: 2px;
+        }
+
+        .result-badge .icon {
+            font-size: 2.2rem;
+        }
+
+        .result-confidence {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            color: #FF6B6B;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .result-confidence strong {
+            color: #FF8E53;
+            font-size: 1.6rem;
+        }
+
+        .wbc-types-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .wbc-type {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 16px;
+            text-align: center;
+            border: 2px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .wbc-type:hover {
+            border-color: var(--primary-500);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .wbc-type-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+        .wbc-type-name { font-weight: 600; color: var(--gray-700); font-size: 0.95rem; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0.875rem 4%; }
+            .nav-links, .auth-buttons { display: none; }
+            .analysis-body { padding: 2rem 1.5rem; }
+            .shape { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header" id="header">
+        <nav class="navbar">
+            <a href="/" class="logo">
+                <span class="logo-icon">🩸</span>
+                <span class="title">WBC Classification</span>
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'UserHome' %}">Dashboard</a>
+                <a href="{% url 'training' %}">Training</a>
+                <a href="{% url 'predictions' %}" class="active">Analysis</a>
+            </div>
+            <div class="auth-buttons">
+                <a href="{% url 'index' %}" class="btn-auth btn-logout">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Background Shapes -->
+    <div class="hero-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+    </div>
+
+    <!-- Analysis Content -->
+    <div class="analysis-content">
+        <div class="analysis-container">
+            <a href="{% url 'UserHome' %}" class="back-btn">← Back to Dashboard</a>
+
+            <div class="analysis-card">
+                <div class="analysis-header">
+                    <h1>🔍 WBC Image Analysis</h1>
+                    <p>Upload a white blood cell image for instant classification</p>
+                </div>
+
+                <div class="analysis-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="upload-area">
+                            <span class="upload-icon">📤</span>
+                            <h3>Drag & Drop or Click to Upload</h3>
+                            <p>Supported formats: JPG, PNG, JPEG | Max size: 10MB</p>
+                            <div class="file-input-wrapper">
+                                <span class="btn-upload">Choose File</span>
+                                <input type="file" name="image" id="imageUpload" required accept="image/*" onchange="updateFileName()">
+                            </div>
+                            <p id="fileName" style="margin-top: 1rem; color: var(--primary-600); font-weight: 600;"></p>
+                        </div>
+
+                        <div style="text-align: center;">
+                            <button type="submit" class="btn-predict">Predict WBC Type</button>
+                        </div>
+                    </form>
+
+                    {% if predicted_class %}
+                    <div class="result-section">
+                        <h3>✨ Prediction Result ✨</h3>
+                        {% if image_url %}
+                            <img src="{{ image_url }}" alt="Uploaded WBC Image" class="result-image">
+                        {% endif %}
+                        <div>
+                            <span class="result-badge">
+                                <span class="icon">🔬</span> {{ predicted_class }}
+                            </span>
+                        </div>
+                        {% if confidence %}
+                        <div class="result-confidence">
+                            📊 Confidence: <strong>{{ confidence }}%</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="wbc-types-info">
+                        <div class="wbc-type">
+                            <div class="wbc-type-icon">🔬</div>
+                            <div class="wbc-type-name">Neutrophil</div>
+                        </div>
+                        <div class="wbc-type">
+                            <div class="wbc-type-icon">🛡️</div>
+                            <div class="wbc-type-name">Lymphocyte</div>
+                        </div>
+                        <div class="wbc-type">
+                            <div class="wbc-type-icon">🦠</div>
+                            <div class="wbc-type-name">Monocyte</div>
+                        </div>
+                        <div class="wbc-type">
+                            <div class="wbc-type-icon">⚡</div>
+                            <div class="wbc-type-name">Eosinophil</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        function updateFileName() {
+            const input = document.getElementById('imageUpload');
+            const fileName = document.getElementById('fileName');
+            if (input.files && input.files[0]) {
+                fileName.textContent = 'Selected: ' + input.files[0].name;
+            }
+        }
+    </script>
+</body>
+</html>

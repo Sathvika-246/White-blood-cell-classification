@@ -1,0 +1,430 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBC Classification - Admin Portal</title>
+
+    <style>
+        /* ============ CSS VARIABLES ============ */
+        :root {
+            --primary-50: #F0FDFA;
+            --primary-100: #CCFBF1;
+            --primary-200: #99F6E4;
+            --primary-300: #5EEAD4;
+            --primary-400: #2DD4BF;
+            --primary-500: #14B8A6;
+            --primary-600: #0D9488;
+            --primary-700: #0F766E;
+            --accent-coral: #FF6B6B;
+            --accent-orange: #FF8E53;
+            --accent-yellow: #FFD93D;
+            --accent-purple: #6C5CE7;
+            --accent-pink: #FD79A8;
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --white: #FFFFFF;
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0D9488 0%, #14B8A6 50%, #3B82F6 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ============ FLOATING SHAPES ANIMATION ============ */
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 60%;
+            left: 80%;
+            animation-delay: 3s;
+        }
+
+        .shape:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            top: 40%;
+            left: 60%;
+            animation-delay: 6s;
+        }
+
+        .shape:nth-child(4) {
+            width: 40px;
+            height: 40px;
+            top: 80%;
+            left: 30%;
+            animation-delay: 9s;
+        }
+
+        .shape:nth-child(5) {
+            width: 70px;
+            height: 70px;
+            top: 15%;
+            left: 75%;
+            animation-delay: 12s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-30px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(-15px) rotate(180deg);
+            }
+            75% {
+                transform: translateY(-40px) rotate(270deg);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* ============ HEADER ============ */
+        .admin-header {
+            background: linear-gradient(135deg, var(--gray-900), var(--gray-700));
+            color: var(--white);
+            padding: 25px 0;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-header h1 {
+            color: var(--white);
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* ============ NAVIGATION ============ */
+        .admin-nav {
+            background: var(--white);
+            padding: 15px 0;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .admin-nav ul li a {
+            text-decoration: none;
+            color: var(--gray-700);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 10px 20px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-nav ul li a:hover,
+        .admin-nav ul li a.active {
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            color: var(--white);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* ============ CONTENT ============ */
+        .admin-content {
+            padding: 50px 5%;
+            min-height: calc(100vh - 200px);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============ FOOTER ============ */
+        .admin-footer {
+            background: linear-gradient(135deg, var(--gray-900), var(--gray-700));
+            color: var(--white);
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-footer p {
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* ============ CARDS ============ */
+        .card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        /* ============ TABLES ============ */
+        .table-responsive {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 0;
+            background: var(--white);
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+            color: var(--white);
+            position: sticky;
+            top: 0;
+        }
+
+        .table thead th {
+            padding: 18px 15px;
+            font-weight: 600;
+            text-align: left;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border: none;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--gray-200);
+            transition: background 0.3s ease;
+        }
+
+        .table tbody tr:nth-child(even) {
+            background: var(--gray-50);
+        }
+
+        .table tbody tr:hover {
+            background: var(--primary-50);
+        }
+
+        .table tbody td {
+            padding: 15px;
+            color: var(--gray-700);
+        }
+
+        /* ============ BADGES ============ */
+        .badge {
+            display: inline-block;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge-activated {
+            background: #10B981;
+            color: var(--white);
+        }
+
+        .badge-waiting {
+            background: var(--accent-orange);
+            color: var(--white);
+        }
+
+        /* ============ BUTTONS ============ */
+        .btn {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-activate {
+            background: var(--primary-500);
+            color: var(--white);
+        }
+
+        .btn-activate:hover {
+            background: var(--primary-600);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            background: var(--accent-coral);
+            color: var(--white);
+        }
+
+        .btn-delete:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: var(--white);
+        }
+
+        /* ============ ALERTS ============ */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+            border-left: 4px solid #10B981;
+        }
+
+        .alert-error,
+        .alert-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-left: 4px solid #FCA5A5;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Floating Shapes Background -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="admin-header">
+        <h1>🔐 WBC Classification - Admin Portal</h1>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <ul>
+            <li><a href="{% url 'AdminHome' %}">Home</a></li>
+            <li><a href="{% url 'RegisterUsersView' %}">User Details</a></li>
+            <li><a href="{% url 'index' %}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="admin-content">
+        {% block contents %}
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="admin-footer">
+        <p>&copy; 2024 WBC Classification Project. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Auto-hide messages after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.alert');
+            messages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.opacity = '0';
+                    message.style.transition = 'opacity 0.5s ease';
+                    setTimeout(function() {
+                        message.style.display = 'none';
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

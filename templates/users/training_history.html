@@ -1,0 +1,219 @@
+{% extends 'users/userbase.html' %}
+{% load static %}
+
+{% block page_title %}Training History{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .history-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(20px);
+        padding: 40px;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .history-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .history-header h2 {
+        color: var(--primary-600);
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    .history-header p {
+        color: var(--gray-600);
+        font-size: 1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .stat-card {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        padding: 25px;
+        border-radius: 16px;
+        text-align: center;
+        color: white;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .value {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .stat-card .label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .empty-state-icon {
+        font-size: 5rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    .empty-state h3 {
+        color: var(--gray-700);
+        margin-bottom: 10px;
+    }
+
+    .empty-state p {
+        color: var(--gray-500);
+    }
+
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .results-table thead {
+        background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+        color: white;
+    }
+
+    .results-table thead th {
+        padding: 15px;
+        font-weight: 600;
+        text-align: left;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+    }
+
+    .results-table tbody tr {
+        border-bottom: 1px solid var(--gray-200);
+    }
+
+    .results-table tbody tr:nth-child(even) {
+        background: var(--gray-50);
+    }
+
+    .results-table tbody tr:hover {
+        background: var(--primary-50);
+    }
+
+    .results-table tbody td {
+        padding: 15px;
+        color: var(--gray-700);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background: linear-gradient(135deg, #10B981, #059669);
+        color: white;
+    }
+
+    .timestamp-cell {
+        font-size: 0.9rem;
+        color: var(--gray-600);
+    }
+
+    .accuracy-cell {
+        font-weight: 600;
+        color: var(--primary-600);
+    }
+</style>
+{% endblock %}
+
+{% block contents %}
+<div class="history-container">
+    <div class="history-card">
+        <div class="history-header">
+            <h2>📊 Training History</h2>
+            <p>Track all model training sessions with timestamps and performance metrics</p>
+        </div>
+
+        {% if sessions %}
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">📈</div>
+                <div class="value">{{ sessions|length }}</div>
+                <div class="label">Total Sessions</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">🎯</div>
+                <div class="value">{{ sessions.0.final_accuracy|floatformat:2 }}%</div>
+                <div class="label">Latest Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">✅</div>
+                <div class="value">{{ sessions|length }}</div>
+                <div class="label">Completed</div>
+            </div>
+        </div>
+
+        <h3 style="color: var(--gray-800); margin-bottom: 20px;">Training Sessions</h3>
+        <div class="table-responsive">
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>Serial No.</th>
+                        <th>Timestamp</th>
+                        <th>Epochs Completed</th>
+                        <th>Final Accuracy</th>
+                        <th>Validation Accuracy</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td><strong>{{ session.serial_no }}</strong></td>
+                        <td class="timestamp-cell">{{ session.timestamp|date:"M d, Y H:i:s" }}</td>
+                        <td>{{ session.epochs_completed }}</td>
+                        <td class="accuracy-cell">{{ session.final_accuracy|floatformat:4 }}</td>
+                        <td class="accuracy-cell">{{ session.final_val_accuracy|floatformat:4 }}</td>
+                        <td>
+                            <span class="status-badge status-completed">{{ session.status|title }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h3>No Training Sessions Yet</h3>
+            <p>Start training the model to see session history here</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
